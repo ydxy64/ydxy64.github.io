@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>深色主题Markdown文章展示</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #121212 0%, #1e1e1e 100%);
+            color: #e0e0e0;
+            font-family: 'Segoe UI', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.8;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px;
+            background: rgba(30, 30, 30, 0.7);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(100, 100, 255, 0.1) 0%, transparent 70%);
+            z-index: -1;
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+            padding-bottom: 30px;
+        }
+        
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #4a86ff, transparent);
+        }
+        
+        h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #4a86ff, #b380ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+            text-shadow: 0 5px 15px rgba(74, 134, 255, 0.2);
+        }
+        
+        .article-meta {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 15px;
+            color: #a0a0a0;
+            font-size: 0.95rem;
+            flex-wrap: wrap;
+        }
+        
+        .article-meta span {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .article-content {
+            text-align: center;
+            font-size: 1.15rem;
+        }
+        
+        .article-content > * {
+            margin: 0 auto 30px auto;
+            max-width: 700px;
+        }
+        
+        .article-content h1, 
+        .article-content h2, 
+        .article-content h3 {
+            color: #fff;
+            margin-top: 50px;
+            margin-bottom: 25px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .article-content h1::after,
+        .article-content h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, #4a86ff, #b380ff);
+            border-radius: 3px;
+        }
+        
+        .article-content h1 {
+            font-size: 2.5rem;
+        }
+        
+        .article-content h2 {
+            font-size: 2rem;
+        }
+        
+        .article-content h3 {
+            font-size: 1.6rem;
+        }
+        
+        .article-content p {
+            text-align: center;
+            color: #d0d0d0;
+            line-height: 1.9;
+        }
+        
+        .article-content a {
+            color: #4a86ff;
+            text-decoration: none;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .article-content a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: #4a86ff;
+            transition: width 0.3s ease;
+        }
+        
+        .article-content a:hover {
+            color: #b380ff;
+        }
+        
+        .article-content a:hover::after {
+            width: 100%;
+        }
+        
+        .article-content ul, 
+        .article-content ol {
+            display: inline-block;
+            text-align: left;
+            margin: 20px 0 30px 0;
+            padding-left: 30px;
+        }
+        
+        .article-content li {
+            margin-bottom: 12px;
+        }
+        
+        .article-content blockquote {
+            border-left: 4px solid #4a86ff;
+            padding: 15px 25px;
+            margin: 30px auto;
+            background: rgba(74, 134, 255, 0.08);
+            border-radius: 0 10px 10px 0;
+            max-width: 700px;
+            font-style: italic;
+            position: relative;
+        }
+        
+        .article-content blockquote::before {
+            content: """;
+            position: absolute;
+            top: -30px;
+            left: 10px;
+            font-size: 5rem;
+            color: rgba(74, 134, 255, 0.2);
+            font-family: Georgia, serif;
+        }
+        
+        .article-content pre {
+            background: #1a1a1a;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px auto;
+            text-align: left;
+            overflow: auto;
+            max-width: 700px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+        }
+        
+        .article-content pre::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .article-content code {
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.95rem;
+        }
+        
+        .article-content img {
+            max-width: 100%;
+            border-radius: 12px;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s ease;
+        }
+        
+        .article-content img:hover {
+            transform: scale(1.02);
+        }
+        
+        .article-footer {
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+        
+        .tags {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .tag {
+            background: rgba(74, 134, 255, 0.15);
+            color: #4a86ff;
+            padding: 6px 18px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .tag:hover {
+            background: rgba(74, 134, 255, 0.3);
+            transform: translateY(-3px);
+        }
+        
+        .social-share {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .social-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            font-size: 1.3rem;
+            transition: all 0.3s ease;
+        }
+        
+        .social-icon:hover {
+            transform: translateY(-5px);
+            background: #4a86ff;
+            box-shadow: 0 5px 15px rgba(74, 134, 255, 0.4);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .article-content h1 {
+                font-size: 2rem;
+            }
+            
+            .article-content h2 {
+                font-size: 1.7rem;
+            }
+            
+            .article-content h3 {
+                font-size: 1.4rem;
+            }
+            
+            .article-content > * {
+                max-width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                padding: 20px 10px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .article-content {
+                font-size: 1rem;
+            }
+            
+            .article-meta {
+                gap: 15px;
+                font-size: 0.85rem;
+            }
+        }
+        
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #4a86ff;
+            border-radius: 5px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #b380ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>探索宇宙的未解之谜</h1>
+            <div class="article-meta">
+                <span><i class="far fa-user"></i> 作者：天文学者</span>
+                <span><i class="far fa-calendar"></i> 发布日期：2023年10月15日</span>
+                <span><i class="far fa-clock"></i> 阅读时间：8分钟</span>
+            </div>
+        </header>
+        
+        <div class="article-content" id="article-content">
+            <!-- Markdown内容将通过JavaScript渲染到这里 -->
+        </div>
+        
+        <footer class="article-footer">
+            <div class="tags">
+                <span class="tag">宇宙学</span>
+                <span class="tag">暗物质</span>
+                <span class="tag">黑洞</span>
+                <span class="tag">天体物理学</span>
+            </div>
+            
+            <div class="social-share">
+                <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                <a href="#" class="social-icon"><i class="fab fa-weibo"></i></a>
+            </div>
+        </footer>
+    </div>
+    
+    <script>
+        // 配置marked.js
+        marked.setOptions({
+            breaks: true,
+            highlight: function(code, lang) {
+                if (lang && hljs.getLanguage(lang)) {
+                    try {
+                        return hljs.highlight(code, { language: lang }).value;
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
+                return hljs.highlightAuto(code).value;
+            }
+        });
+        
+        // Markdown内容
+        const markdownContent = `
+# 浅谈南昌地铁三期规划 #
+
+*免责声明：以下内容**不代表任何他人或机构立场态度及看法，仅为笔者本人主观意见，代表笔者本人立场及看法。***
+
+*正文：**1048字***
+
+*附件：南昌地铁三期规划（2024.8.5~2024.8.16公示版）示意图（2024.08.17绘）*
+
+---
+
+时光荏苒，转眼从二期的三条延伸线仅仅存在于纸面，到还有一个月不到就要正式通车，已经不知不觉过去五年了。既有一二号线的车站吊板已经陆续更换为新款，一二号线增购车也已经上线运行，这些无不让我们感到新线通车已经指日可待。
+
+然而当那一天到来后，喜悦过后可能就是无止境的等待。
+
+南昌地铁五号线从被提及至今已有二十年左右的时间，但经历了近十版规划的修修改改之后，它的走向大体还维持着最初的版本：大致是一条环线。这条环线放在南昌却始终有些许格格不入：五十余公里的里程，放在全国都属于不是老二就是老三的水平，徜若再往外走几步，可能就要超越北京十号线，一举成为全国最长地铁环线。然而它放在南昌就像是一个小孩穿了一件大人的衣服。
+
+过去曾有过几次版本，将这条环线拆成了两条首尾相接的线路，为了方便报批，就像沈阳地铁9号线和10号线一样，然而不久过后这个方案就被弃之不用，因为或许南昌人真正需要的，不是一条仅仅到那里的地铁，而是一圈真正能发挥“环”的作用的地铁线。翻开地图，南昌的地铁网像一只蜘蛛一样，如果你在莲塘想去江对面的九龙湖，开车只需要一刻钟，直接经由洪州大桥，但坐地铁最近也必须绕到桃苑去。这不是个例，而是普遍情况。因此，很多人都期盼这条“5号线”能够带来极大的便利。
+
+到现在，新建区仍然没有一条地铁，每到下班高峰期前去新建的公交车就挤满了人，和其他地方的公交完全是两个场景：一个水泄不通，一个门可罗雀。在三期规划中，5号线和6号线在长堎——新建老城区，十字交叉，如果真的建成，那么新建与南昌之间的交通将被彻底打通。但是，这需要多久？
+
+当前，据说上方已经终止了一切新的地铁审批，虽然消息的真实度有待考究，但是从其他中小城市的地铁建设来看，新线的审批恐怕只会越来越难。当前三期规划已经完成了环境评价，按照之前正常的进度，大约2031年可以通车。真是如此吗？恐怕困难，五号线因为审批问题砍去了北半环扬子洲段，六号线也砍去了朝阳段，三号线南延伸也不见踪影。至此，五号线已经丧失了他的环线功能，除非在未来能够再打通。但是八十余公里的线路，能否全盘批下，只能让时间给出答案。
+
+或许，最乐观的情况是可以修建六号线的湾里-翠苑路段，让新建和湾里通上地铁。但那又要待何时？三年前，我预言三期工程竣工需待2029年，现在，我认为2039都难以完全确定……而五号线，可能需要继续被囚禁在规划图中……
+
+说到最后，三期地铁规划，或许还有很长的路要走。五六号线，可能只能继续在规划图、房产海报和人们的口中来回徘徊。至于何时能够跳出牢笼？没人敢下定论。
+        `;
+        
+        // 渲染Markdown内容
+        document.getElementById('article-content').innerHTML = marked.parse(markdownContent);
+        
+        // 高亮所有代码块
+        document.querySelectorAll('pre code').forEach((el) => {
+            hljs.highlightElement(el);
+        });
+    </script>
+</body>
+</html>
