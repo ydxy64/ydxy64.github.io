@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>极简Markdown阅读器</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: #000;
+            color: #e0e0e0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .article-container {
+            background-color: #0d1117;
+            border-radius: 6px;
+            max-width: 800px;
+            width: 100%;
+            padding: 50px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+        
+        .language-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 4px;
+            padding: 8px 12px;
+            color: #e0e0e0;
+            font-size: 14px;
+            outline: none;
+            cursor: pointer;
+        }
+        
+        .language-selector:focus {
+            border-color: #58a6ff;
+        }
+        
+        .markdown-content {
+            font-size: 16px;
+            text-align: left;
+            margin-top: 20px;
+        }
+        
+        .markdown-content h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin: 30px 0 20px;
+            color: #f0f0f0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #30363d;
+        }
+        
+        .markdown-content h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 25px 0 15px;
+            color: #f0f0f0;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #30363d;
+        }
+        
+        .markdown-content h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 20px 0 12px;
+            color: #f0f0f0;
+        }
+        
+        .markdown-content p {
+            margin-bottom: 16px;
+        }
+        
+        .markdown-content ul, 
+        .markdown-content ol {
+            padding-left: 40px;
+            margin-bottom: 20px;
+        }
+        
+        .markdown-content li {
+            margin-bottom: 8px;
+        }
+        
+        .markdown-content li p {
+            margin-bottom: 8px;
+        }
+        
+        .markdown-content blockquote {
+            border-left: 4px solid #30363d;
+            padding: 0 15px;
+            margin: 20px 0;
+            color: #8b949e;
+        }
+        
+        .markdown-content pre {
+            background-color: #161b22;
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-size: 14px;
+            border: 1px solid #30363d;
+        }
+        
+        .markdown-content code {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            background-color: rgba(110, 118, 129, 0.4);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .markdown-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            border: 1px solid #30363d;
+        }
+        
+        .markdown-content th {
+            background-color: #161b22;
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #30363d;
+            font-weight: 600;
+        }
+        
+        .markdown-content td {
+            padding: 10px;
+            border: 1px solid #30363d;
+        }
+        
+        .markdown-content a {
+            color: #58a6ff;
+            text-decoration: none;
+        }
+        
+        .markdown-content a:hover {
+            text-decoration: underline;
+        }
+        
+        .markdown-content img {
+            max-width: 100%;
+            border-radius: 4px;
+            margin: 15px 0;
+            border: 1px solid #30363d;
+        }
+        
+        @media (max-width: 600px) {
+            .article-container {
+                padding: 30px 20px;
+            }
+            
+            .markdown-content h1 {
+                font-size: 1.8rem;
+            }
+            
+            .markdown-content h2 {
+                font-size: 1.4rem;
+            }
+            
+            .markdown-content h3 {
+                font-size: 1.2rem;
+            }
+            
+            .markdown-content ul, 
+            .markdown-content ol {
+                padding-left: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="article-container">
+        <select id="languageSelector" class="language-selector">
+            <option value="zh-CN">简体中文</option>
+            <option value="zh-TW">繁體中文</option>
+            <option value="en">English</option>
+        </select>
+        
+        <div id="markdownContent" class="markdown-content"></div>
+    </div>
+
+    <script>
+        // 初始化highlight.js
+        hljs.highlightAll();
+        
+        // 多语言Markdown内容
+        const markdownContent = {
+            "zh-CN": `# GitHub风格Markdown阅读器
+
+这是一个极简的Markdown阅读器，采用GitHub风格的代码高亮和黑白灰设计。
+
+## 功能特点
+
+- GitHub风格的代码高亮
+- 多语言支持（简体中文、繁体中文、英文）
+- 响应式设计
+- 简洁的黑白灰界面
+- 无干扰阅读体验
+
+## 代码示例
+
+\`\`\`javascript
+// JavaScript示例
+function greet(name) {
+    return \`你好，\${name}！\`;
+}
+
+console.log(greet('世界'));
+\`\`\`
+
+\`\`\`python
+# Python示例
+def fibonacci(n):
+    a, b = 0, 1
+    for _ in range(n):
+        yield a
+        a, b = b, a + b
+
+print(list(fibonacci(10)))
+\`\`\`
+
+## 表格示例
+
+| 功能        | 支持情况     | 说明          |
+|-------------|--------------|---------------|
+| 代码高亮    | ✓            | 支持多种语言  |
+| 表格        | ✓            | 完整支持      |
+| 数学公式    | ✗            | 暂不支持      |
+| 图片        | ✓            | 支持内嵌图片  |
+
+## 引用块
+
+> "简约是终极的复杂。"  
+> —— 列奥纳多·达·芬奇
+
+## 列表
+
+### 有序列表
+1. 第一项
+2. 第二项
+3. 第三项
+
+### 无序列表
+- 项目A
+- 项目B
+- 项目C
+
+## 结语
+
+这个阅读器专注于内容本身，没有任何分散注意力的元素，提供了纯粹的阅读体验。
+`,
+            "zh-TW": `# GitHub風格Markdown閱讀器
+
+這是一個極簡的Markdown閱讀器，採用GitHub風格的程式碼高亮和黑白灰設計。
+
+## 功能特點
+
+- GitHub風格的程式碼高亮
+- 多語言支援（簡體中文、繁體中文、英文）
+- 響應式設計
+- 簡潔的黑白灰界面
+- 無干擾閱讀體驗
+
+## 程式碼示例
+
+\`\`\`javascript
+// JavaScript示例
+function greet(name) {
+    return \`你好，\${name}！\`;
+}
+
+console.log(greet('世界'));
+\`\`\`
+
+\`\`\`python
+# Python示例
+def fibonacci(n):
+    a, b = 0, 1
+    for _ in range(n):
+        yield a
+        a, b = b, a + b
+
+print(list(fibonacci(10)))
+\`\`\`
+
+## 表格示例
+
+| 功能        | 支援情況     | 說明          |
+|-------------|--------------|---------------|
+| 程式碼高亮  | ✓            | 支援多種語言  |
+| 表格        | ✓            | 完整支援      |
+| 數學公式    | ✗            | 暫不支援      |
+| 圖片        | ✓            | 支援內嵌圖片  |
+
+## 引用塊
+
+> "簡約是終極的複雜。"  
+> —— 李奧納多·達·文西
+
+## 列表
+
+### 有序列表
+1. 第一項
+2. 第二項
+3. 第三項
+
+### 無序列表
+- 項目A
+- 項目B
+- 項目C
+
+## 結語
+
+這個閱讀器專注於內容本身，沒有任何分散注意力的元素，提供了純粹的閱讀體驗。
+`,
+            "en": `# GitHub Style Markdown Reader
+
+This is a minimalist Markdown reader with GitHub-style code highlighting and black & white design.
+
+## Features
+
+- GitHub-style code highlighting
+- Multi-language support (Simplified Chinese, Traditional Chinese, English)
+- Responsive design
+- Clean black and white interface
+- Distraction-free reading experience
+
+## Code Examples
+
+\`\`\`javascript
+// JavaScript example
+function greet(name) {
+    return \`Hello, \${name}!\`;
+}
+
+console.log(greet('World'));
+\`\`\`
+
+\`\`\`python
+# Python example
+def fibonacci(n):
+    a, b = 0, 1
+    for _ in range(n):
+        yield a
+        a, b = b, a + b
+
+print(list(fibonacci(10)))
+\`\`\`
+
+## Table Example
+
+| Feature       | Support       | Description          |
+|---------------|---------------|----------------------|
+| Code Highlight| ✓             | Multiple languages  |
+| Tables        | ✓             | Full support         |
+| Math Formulas | ✗             | Not supported yet    |
+| Images        | ✓             | Supports embedded    |
+
+## Blockquote
+
+> "Simplicity is the ultimate sophistication."  
+> — Leonardo da Vinci
+
+## Lists
+
+### Ordered List
+1. First item
+2. Second item
+3. Third item
+
+### Unordered List
+- Item A
+- Item B
+- Item C
+
+## Conclusion
+
+This reader focuses solely on content without any distracting elements, providing a pure reading experience.
+`
+        };
+
+        // 初始渲染Markdown
+        function renderMarkdown(lang = 'zh-CN') {
+            const content = markdownContent[lang] || markdownContent['zh-CN'];
+            document.getElementById('markdownContent').innerHTML = marked.parse(content);
+            
+            // 重新高亮所有代码块
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block);
+            });
+        }
+
+        // 语言切换事件
+        document.getElementById('languageSelector').addEventListener('change', (e) => {
+            renderMarkdown(e.target.value);
+        });
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            renderMarkdown();
+        });
+    </script>
+</body>
+</html>
