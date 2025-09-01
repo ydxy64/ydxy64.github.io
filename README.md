@@ -1,9 +1,5 @@
-# ydxy64.github.io
+*Now, this website is **under rebuilding.***
 
-*Here are the source code of the website.*
+Please be patient to wait.
 
-*You could view the cobe and ***search some Easter Eggs*** from here.*
-
-**Nearly all code is written by Deepseek.**
-
-~~**In fact, this is a website to cook up wild ideas()**~~
+We plan it will be **finished before Sept.8th.**
