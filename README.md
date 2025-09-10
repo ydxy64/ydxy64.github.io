@@ -2,4 +2,4 @@
 
 Please be patient to wait.
 
-We plan it will be **finished before Sept.8th.**
+We plan it will be **finished about October.**
